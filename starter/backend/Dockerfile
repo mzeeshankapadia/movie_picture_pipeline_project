@@ -33,4 +33,4 @@ RUN chown -R app:app /app
 USER app
 
 # Run uWSGI using module mode
-CMD ["uwsgi", "--http", "0.0.0.0:5000", "--master", "--enable-threads", "--module", "app:app"]
+CMD ["uwsgi", "--http", "0.0.0.0:5000", "--master", "--enable-threads", "--chdir", "/app", "--module", "app:app"]
