@@ -3,7 +3,7 @@ FROM public.ecr.aws/docker/library/python:3.10-slim-bookworm
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # Set working directory
-WORKDIR /app
+WORKDIR /
 
 # Create non-root user
 RUN adduser --uid 1000 --disabled-password --gecos "" app
@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     linux-headers-amd64 \
     && pip install --no-cache-dir pipenv \
     && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /var/www/app && mkdir /app
 
 # Copy application code
 COPY Pipfile Pipfile.lock /app/
