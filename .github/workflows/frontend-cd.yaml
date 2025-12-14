@@ -1,4 +1,4 @@
-name: Frontend CD
+name: Frontend Continuous Deployment
 
 on:
   push:
@@ -14,6 +14,18 @@ env:
   REACT_APP_MOVIE_API_URL: http://localhost:5000
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run lint
   test:
     runs-on: ubuntu-latest
     defaults:
@@ -29,7 +41,7 @@ jobs:
 
   build-and-deploy:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, lint]
     steps:
       - uses: actions/checkout@v4
 
@@ -41,10 +53,9 @@ jobs:
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
 
-      - name: Login to ECR
-        run: |
-          aws ecr get-login-password --region us-east-1 \
-          | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and tag image
         run: |
