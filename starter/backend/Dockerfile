@@ -1,9 +1,8 @@
-FROM python:3.10.12-alpine3.19
-
+FROM public.ecr.aws/docker/library/python:3.10-slim-bullseye
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
-RUN adduser -u 1000 -D app
+RUN useradd --uid 1000 --create-home --shell /bin/bash app
 RUN apk update && \
   apk add \
   pcre \
