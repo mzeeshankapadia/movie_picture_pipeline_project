@@ -11,7 +11,6 @@ env:
   IMAGE_TAG: ${{ github.sha }}
   EKS_CLUSTER: my-eks-cluster
   AWS_REGION: us-east-1
-  REACT_APP_MOVIE_API_URL: http://localhost:5000
 
 jobs:
   lint:
@@ -59,7 +58,7 @@ jobs:
 
       - name: Build and tag image
         run: |
-          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{env.REACT_APP_MOVIE_API_URL}} -t frontend:${IMAGE_TAG} starter/frontend
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{secrets.REACT_APP_MOVIE_API_URL}} -t frontend:${IMAGE_TAG} starter/frontend
           docker tag frontend:${IMAGE_TAG} \
             ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com/frontend:${IMAGE_TAG}
 
