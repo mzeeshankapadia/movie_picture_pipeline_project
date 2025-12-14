@@ -1,4 +1,5 @@
-FROM public.ecr.aws/docker/library/python:3.10-slim-bullseye
+FROM python:3.10.12-alpine3.19
+
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
