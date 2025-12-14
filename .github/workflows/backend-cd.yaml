@@ -9,6 +9,8 @@ on:
 
 env:
   IMAGE_TAG: ${{ github.sha }}
+  EKS_CLUSTER: my-eks-cluster
+  AWS_REGION: us-east-1
 
 jobs:
   lint:
@@ -65,7 +67,16 @@ jobs:
             ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com/backend:${IMAGE_TAG}
           docker push ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com/backend:${IMAGE_TAG}
 
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{env.EKS_CLUSTER}} \
+            --region ${{env.AWS_REGION}}
+
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/backend \
-            backend=${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com/backend:${IMAGE_TAG}
+            backend=${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com/backend:${IMAGE_TAG} \
+            --record
+
+          kubectl rollout status deployment/backend
