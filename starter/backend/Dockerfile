@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /var/www/app && mkdir /app
 
 # Copy application code
-COPY Pipfile Pipfile.lock /app
+COPY Pipfile Pipfile.lock /app/
 RUN cd /app && pipenv install --system --deploy
 
 COPY . /app
