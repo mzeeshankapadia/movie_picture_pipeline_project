@@ -1,0 +1,51 @@
+name: Frontend CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "starter/frontend/**"
+  workflow_dispatch:
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm test
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+          | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build and tag image
+        run: |
+          docker build -t frontend:${IMAGE_TAG} starter/frontend
+          docker tag frontend:${IMAGE_TAG} \
+            $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/frontend:${IMAGE_TAG}
+
+      - name: Push image
+        run: |
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/frontend:${IMAGE_TAG}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=$AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/frontend:${IMAGE_TAG}
